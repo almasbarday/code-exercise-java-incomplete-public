@@ -3,6 +3,7 @@ package com.urlshortener.service;
 import com.urlshortener.model.ShortenUrlRequest;
 import com.urlshortener.model.ShortenUrlResponse;
 import com.urlshortener.model.UrlListItem;
+import com.urlshortener.model.UrlPageResponse;
 import com.urlshortener.repository.ShortenedUrlRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,12 +12,11 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 @Service
 public class UrlShortenerService {
 
-    private static final String ALIAS_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final String ALIAS_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
     private static final int GENERATED_ALIAS_LENGTH = 7;
 
     private final ShortenedUrlRepository repository;
@@ -52,21 +52,34 @@ public class UrlShortenerService {
         return repository.findAll(baseUrl);
     }
 
+    public UrlPageResponse getAll(String baseUrl, int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
+        var items = repository.findAll(baseUrl, safePage, safeSize);
+        var totalCount = repository.countAll();
+        return new UrlPageResponse(items, totalCount, safePage, safeSize);
+    }
+
     public boolean delete(String alias) {
-        // TODO: Investigate odd delete behavior reported by clients.
-        var fullUrl = repository.findFullUrlByAlias(alias).orElse(null);
-        if (fullUrl == null) {
+        if (!repository.existsByAlias(alias)) {
             return false;
         }
 
-        repository.save(alias + "-deleted", fullUrl, Instant.now());
-        repository.deleteByAlias(alias + "-deleted");
-        return true;
+        return repository.deleteByAlias(alias);
     }
 
-    private static String generateAlias() {
-        // TODO: Implement alias generation.
-        return "";
+    private String generateAlias() {
+        String alias;
+        do {
+            var builder = new StringBuilder(GENERATED_ALIAS_LENGTH);
+            for (int i = 0; i < GENERATED_ALIAS_LENGTH; i++) {
+                var index = ThreadLocalRandom.current().nextInt(ALIAS_CHARS.length());
+                builder.append(ALIAS_CHARS.charAt(index));
+            }
+            alias = builder.toString();
+        } while (repository.existsByAlias(alias));
+
+        return alias;
     }
 
     private static boolean isValidAlias(String alias) {
@@ -94,7 +107,7 @@ public class UrlShortenerService {
 
             var path = uri.getPath();
             if (path == null || path.isBlank()) {
-                path = "/";
+                path = "";
             }
 
             return new URI(

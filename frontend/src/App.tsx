@@ -4,8 +4,24 @@ import { ResultBanner } from './components/ResultBanner';
 import { UrlTable } from './components/UrlTable';
 
 export default function App() {
-  const { urls, loading, error, lastCreated, shorten, deleteUrl, clearLastCreated } =
-    useUrlShortener();
+  const {
+    urls,
+    loading,
+    error,
+    lastCreated,
+    currentPage,
+    pageSize,
+    totalCount,
+    previousPage,
+    nextPage,
+    shorten,
+    deleteUrl,
+    clearLastCreated,
+  } = useUrlShortener();
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const previousDisabled = loading || currentPage <= 0 || totalPages <= 1;
+  const nextDisabled = loading || currentPage >= totalPages - 1 || totalPages <= 1;
 
   return (
     <div className="app">
@@ -41,7 +57,7 @@ export default function App() {
           <h2 id="list-heading" className="card__title">
             All shortened URLs
             {urls.length > 0 && (
-              <span className="badge">{urls.length}</span>
+              <span className="badge">{totalCount}</span>
             )}
           </h2>
 
@@ -50,7 +66,45 @@ export default function App() {
               Loading…
             </div>
           ) : (
-            <UrlTable urls={urls} onDelete={deleteUrl} />
+            <>
+              <UrlTable urls={urls} onDelete={deleteUrl} />
+
+              {totalCount > pageSize && (
+                <div className="pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    disabled={previousDisabled}
+                    aria-disabled={previousDisabled}
+                    onClick={() => {
+                      if (!previousDisabled) {
+                        void previousPage();
+                      }
+                    }}
+                  >
+                    Previous
+                  </button>
+
+                  <span aria-live="polite">
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    disabled={nextDisabled}
+                    aria-disabled={nextDisabled}
+                    onClick={() => {
+                      if (!nextDisabled) {
+                        void nextPage();
+                      }
+                    }}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </main>

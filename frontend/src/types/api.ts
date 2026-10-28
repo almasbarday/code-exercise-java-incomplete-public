@@ -15,6 +15,13 @@ export interface UrlListItem {
   shortUrl: string;
 }
 
+export interface PaginatedUrlResponse {
+  items: UrlListItem[];
+  totalCount: number;
+  page: number;
+  size: number;
+}
+
 export interface ApiError {
   error: string;
 }

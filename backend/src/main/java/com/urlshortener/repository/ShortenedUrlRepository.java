@@ -51,8 +51,25 @@ public class ShortenedUrlRepository {
     }
 
     public List<UrlListItem> findAll(String baseUrl) {
-        return jdbc.query("SELECT alias, full_url FROM shortened_urls",
-                urlListItemMapper(baseUrl));
+        return findAll(baseUrl, 0, Integer.MAX_VALUE);
+    }
+
+    public List<UrlListItem> findAll(String baseUrl, int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
+        int offset = safePage * safeSize;
+
+        return jdbc.query(
+                "SELECT alias, full_url FROM shortened_urls ORDER BY created_at DESC LIMIT ? OFFSET ?",
+                urlListItemMapper(baseUrl),
+                safeSize,
+                offset
+        );
+    }
+
+    public long countAll() {
+        Long count = jdbc.queryForObject("SELECT COUNT(1) FROM shortened_urls", Long.class);
+        return count == null ? 0 : count;
     }
 
     public boolean deleteByAlias(String alias) {
