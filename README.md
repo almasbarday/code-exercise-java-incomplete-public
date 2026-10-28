@@ -1,117 +1,312 @@
-## Coding Assessment Tasks
+# URL Shortener
 
-### Intro
-This is a URL shortener that has been created by a junior engineer. Your task is to review the solution, check that it works, and find any errors they may have made, as well as complete the fixes and TODOs listed below.
+A full-stack URL shortener built with Java Spring Boot on the backend and React + TypeScript on the frontend. The app accepts a long URL, optionally creates a custom alias, stores it in SQLite, and redirects requests to the original destination.
 
-This solution has been pre-seeded with data in the database already.
+## Project overview
 
-Note that these are not necessarily in the order you will need to address them.
+This repository contains:
 
-### Fixes
+- backend/ — Spring Boot REST API and SQLite persistence
+- frontend/ — Vite + React UI for shortening and listing URLs
+- docker-compose.yml — container orchestration for the API and frontend
+- README.md — project setup and usage guide
 
-- **Fix Delete Behavior:** The client has reported strange behavior when clicking on delete on a URL. Investigate and fix the issue.
-- **Generate Alias:** Implement the `generateAlias` function.
-- **UI Implementation:** Build out the UI to display the URLs on the main page.
+### Typical flow
 
-### TODO
+1. User submits a long URL in the frontend.
+2. Backend validates the URL and alias.
+3. A shortened alias is generated or taken from the request.
+4. The record is stored in SQLite.
+5. The frontend displays the shortened URL and listing.
+6. Visiting the shortened path redirects back to the original URL.
 
-- Add paging for retrieval of the URLs.
-- Sort URLs by their creation date.
-- Create the Docker commands to run the solution.
-- Replace this README with an appropriate one.
+## Tech stack
 
----
+- Java 17
+- Spring Boot 3.2
+- SQLite via JDBC
+- React 18
+- TypeScript
+- Vite
+- Docker / Docker Compose
 
-# Snip – URL Shortener
+## Prerequisites
 
-A full-stack URL shortener built with **Java Spring Boot** (backend) and **React + TypeScript** (frontend), containerized with Docker.
+Before running the project locally, make sure you have:
 
----
+- Java 17+
+- Maven 3.9+
+- Node.js 20+
+- npm
+- Docker and Docker Compose (for containerized setup)
 
-## Architecture
+## Local setup
 
+### 1) Start the backend
+
+From the repository root:
+
+```bash
+cd backend
+mvn spring-boot:run
 ```
-frontend/      React + TypeScript (Vite)
-backend/       Java Spring Boot Web API + SQLite
-docker-compose.yml       Orchestrates both services
+
+The backend runs by default on:
+
+- http://localhost:8080
+
+It reads the database from `backend/urlshortener.db` unless `DATABASE_PATH` is overridden.
+
+Optional: run tests:
+
+```bash
+cd backend
+mvn test
 ```
 
-The frontend proxies API calls through Nginx in production, so there are no CORS concerns once containerized. In development, Vite's dev server proxies to the local API.
+### 2) Start the frontend
 
----
+In a second terminal:
 
-## API Reference
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-The API exposes the same contract expected by the existing frontend.
+The frontend dev server runs by default on:
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/shorten` | Create a shortened URL |
-| `GET` | `/urls` | List all shortened URLs |
-| `GET` | `/{alias}` | Redirect to the full URL |
-| `DELETE` | `/{alias}` | Delete a shortened URL |
+- http://localhost:3000
 
-### POST /shorten
+The Vite config proxies API traffic to `http://localhost:8080`, so the frontend can call `POST /shorten` and `GET /urls` without manual CORS configuration.
+
+### 3) Build the frontend for production
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+## Backend commands
+
+From the `backend` directory:
+
+```bash
+# Run the app
+mvn spring-boot:run
+
+# Build the jar
+mvn package
+
+# Run tests
+mvn test
+
+# Run a clean build
+mvn clean package
+```
+
+## Frontend commands
+
+From the `frontend` directory:
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build production bundle
+npm run build
+
+# Preview production build locally
+npm run preview
+
+# Run frontend tests
+npm test
+
+# Watch tests in development
+npm run test:watch
+```
+
+## Docker commands
+
+From the repository root:
+
+```bash
+# Build and start both services
+docker compose up --build
+
+# Run in the background
+docker compose up --build -d
+
+# Stop services
+docker compose down
+
+# Rebuild without cache
+docker compose build --no-cache
+
+# View logs
+docker compose logs -f
+
+# View API logs only
+docker compose logs -f api
+
+# View frontend logs only
+docker compose logs -f frontend
+```
+
+The Docker setup exposes:
+
+- Frontend: http://localhost:3000
+- API: http://localhost:8080
+
+The API stores its SQLite database in a Docker volume at `/data`, so it persists between container restarts.
+
+## API examples
+
+All examples assume the backend is running on `http://localhost:8080`.
+
+### Create a shortened URL
+
+```bash
+curl -X POST http://localhost:8080/shorten \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullUrl": "https://example.com/very/long/path",
+    "customAlias": "demo-link"
+  }'
+```
+
+Example response:
 
 ```json
-// Request
 {
+  "alias": "demo-link",
   "fullUrl": "https://example.com/very/long/path",
-  "customAlias": "my-alias"   // optional
-}
-
-// Response 201
-{
-  "alias": "my-alias",
-  "fullUrl": "https://example.com/very/long/path",
-  "shortUrl": "http://localhost:8080/my-alias"
+  "shortUrl": "http://localhost:8080/demo-link"
 }
 ```
 
-Returns `400` if the URL is invalid, the alias is malformed, or the alias is already taken.
+If `customAlias` is omitted, the server generates one automatically.
 
-### GET /urls
+### List shortened URLs
 
-Supports query parameters `page` and `size` (defaults: `page=0`, `size=10`).
+```bash
+curl "http://localhost:8080/urls?page=0&size=10"
+```
+
+Example response:
 
 ```json
-// Response 200
 {
   "items": [
     {
-      "alias": "my-alias",
+      "alias": "demo-link",
       "fullUrl": "https://example.com/very/long/path",
-      "shortUrl": "http://localhost:8080/my-alias"
+      "shortUrl": "http://localhost:8080/demo-link"
     }
   ],
-  "totalCount": 42,
+  "totalCount": 1,
   "page": 0,
   "size": 10
 }
 ```
 
-The list is returned in pages using `LIMIT` and `OFFSET` in the backend query. The response includes the requested page slice and the total number of matching rows.
+### Redirect to the original URL
 
-### GET /{alias}
+```bash
+curl -I http://localhost:8080/demo-link
+```
 
-Returns `302 Redirect` to the full URL, or `404` if the alias doesn't exist.
+This returns a redirect response to the original URL.
 
-### DELETE /{alias}
+### Delete a shortened URL
 
-Returns `204 No Content` on success, `404` if alias not found.
+```bash
+curl -X DELETE http://localhost:8080/demo-link
+```
 
----
+A successful delete returns `204 No Content`.
 
-## Design Decisions & Assumptions
+## App behavior and validation
 
-**Persistence** - SQLite via JDBC. The database file path is configurable via the `DATABASE_PATH` environment variable and is volume-mounted in Docker so data survives container restarts.
+- `fullUrl` must be a valid URL.
+- `customAlias` is optional and must be 2-64 characters long.
+- Allowed alias characters are letters, numbers, and hyphens.
+- Duplicate aliases are rejected.
+- The app returns JSON errors in the format:
 
-**Alias validation** - Aliases must be 2-64 characters, containing only letters, numbers, and hyphens. This mirrors typical URL shortener conventions and avoids characters that are awkward in URLs.
+```json
+{
+  "error": "message"
+}
+```
 
-**Random alias generation** - 
+## Troubleshooting
 
-**Error handling** - Invalid input and domain errors are translated into JSON error responses like `{ "error": "..." }`.
+### Backend fails to start
 
-**Testing** - The backend includes service-level tests and can be extended with integration tests. The frontend includes React component tests and service-level API tests.
+Check:
 
-**Frontend** - The hosted frontend uses Nginx to proxy `/shorten`, `/urls`, and alias requests to the API, so the same Docker setup works without CORS issues.
+- Java 17 is installed
+- Maven dependencies can download successfully
+- The configured database path is writable
+
+Common command:
+
+```bash
+cd backend
+mvn clean package
+```
+
+### Frontend cannot reach the API
+
+Verify:
+
+- The backend is running on `http://localhost:8080`
+- No other process is already using port `8080`
+- In dev mode, Vite is configured to proxy to the backend on that port
+
+### Docker port conflicts
+
+If `localhost:8080` or `localhost:3000` is already in use, stop the conflicting app or change the published ports in `docker-compose.yml`.
+
+### SQLite issues
+
+If the database is not being created or updated:
+
+- confirm the container has permissions for `/data`
+- check the `DATABASE_PATH` environment variable
+- remove the stale local SQLite file if necessary during local development
+
+### Dependency or install problems
+
+For frontend issues:
+
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+
+For backend issues:
+
+```bash
+cd backend
+rm -rf target
+mvn clean install
+```
+
+## Useful URLs
+
+- Frontend (local dev): http://localhost:3000
+- Frontend (Docker): http://localhost:3000
+- Backend API: http://localhost:8080
+- Example shortened URL: http://localhost:8080/demo-link
+
+## Notes
+
+- The Docker frontend uses Nginx to proxy `/shorten`, `/urls`, and alias-based requests to the backend.
+- The app stores data in SQLite and is designed to work as a lightweight local shortener for development and demos.
