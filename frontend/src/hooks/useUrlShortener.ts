@@ -81,12 +81,11 @@ export function useUrlShortener(): UseUrlShortenerReturn {
     setError(null);
     try {
       await api.delete(alias);
-      setUrls((prev) => prev.filter((u) => u.alias !== alias));
-      setTotalCount((prev) => Math.max(prev - 1, 0));
+      await fetchPage(currentPage, pageSize);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to delete URL.');
     }
-  }, []);
+  }, [currentPage, fetchPage, pageSize]);
 
   const clearLastCreated = useCallback(() => setLastCreated(null), []);
 
