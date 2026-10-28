@@ -12,8 +12,6 @@ export default function App() {
     currentPage,
     pageSize,
     totalCount,
-    hasPreviousPage,
-    hasNextPage,
     previousPage,
     nextPage,
     shorten,

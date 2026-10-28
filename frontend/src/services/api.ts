@@ -1,4 +1,4 @@
-import type { PaginatedUrlResponse, ShortenUrlRequest, ShortenUrlResponse, UrlListItem } from '../types/api';
+import type { PaginatedUrlResponse, ShortenUrlRequest, ShortenUrlResponse } from '../types/api';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
