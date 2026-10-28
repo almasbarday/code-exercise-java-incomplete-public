@@ -29,10 +29,12 @@ public class UrlsController {
     }
 
     @PostMapping("/shorten")
-    public ResponseEntity<Void> shorten(
+    public ResponseEntity<ShortenUrlResponse> shorten(
             @Valid @RequestBody ShortenUrlRequest request,
             HttpServletRequest requestContext) {
-        return ResponseEntity.ok().build();
+        var baseUrl = getBaseUrl(requestContext);
+        var response = service.shorten(request, baseUrl);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/urls")
