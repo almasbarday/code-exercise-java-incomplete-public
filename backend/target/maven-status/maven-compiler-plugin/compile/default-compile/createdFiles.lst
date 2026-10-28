@@ -6,3 +6,4 @@ com/urlshortener/model/ShortenUrlResponse.class
 com/urlshortener/repository/ShortenedUrlRepository.class
 com/urlshortener/model/UrlListItem.class
 com/urlshortener/UrlShortenerApplication.class
+com/urlshortener/model/UrlPageResponse.class

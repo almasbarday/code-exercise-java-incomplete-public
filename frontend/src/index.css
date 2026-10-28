@@ -153,7 +153,7 @@ input:focus {
 }
 input:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ── Buttons ─────────────────────────────────────── */
+/* ── Buttons ─────────────────��───────────────────── */
 .btn-primary {
   align-self: flex-start;
   padding: 10px 20px;
@@ -183,6 +183,18 @@ input:disabled { opacity: 0.6; cursor: not-allowed; }
   transition: background 0.15s;
 }
 .btn-secondary:hover { background: #dbeafe; }
+.btn-secondary:disabled,
+.btn-secondary:disabled:hover,
+.btn-secondary:disabled:active,
+.btn-secondary:disabled:focus {
+  background: var(--surface);
+  color: var(--ink-faint);
+  border-color: var(--border);
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.btn-secondary:hover:not(:disabled) { background: #dbeafe; }
 
 .btn-ghost {
   padding: 6px 10px;

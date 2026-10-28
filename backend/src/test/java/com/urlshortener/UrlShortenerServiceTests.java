@@ -63,4 +63,26 @@ public class UrlShortenerServiceTests {
 
         assertEquals("https://example.com", fullUrl);
     }
+
+    @Test
+    void getAll_WithPaging_ReturnsRequestedPageAndTotalCount() {
+        service.shorten(newShortenRequest("https://example.com/1"), BASE_URL);
+        service.shorten(newShortenRequest("https://example.com/2"), BASE_URL);
+        service.shorten(newShortenRequest("https://example.com/3"), BASE_URL);
+
+        var firstPage = service.getAll(BASE_URL, 0, 2);
+        var secondPage = service.getAll(BASE_URL, 1, 2);
+
+        assertEquals(3, firstPage.getTotalCount());
+        assertEquals(2, firstPage.getItems().size());
+        assertEquals(1, secondPage.getItems().size());
+        assertEquals(1, secondPage.getPage());
+        assertEquals(2, secondPage.getSize());
+    }
+
+    private ShortenUrlRequest newShortenRequest(String fullUrl) {
+        var request = new ShortenUrlRequest();
+        request.setFullUrl(fullUrl);
+        return request;
+    }
 }

@@ -72,16 +72,25 @@ Returns `400` if the URL is invalid, the alias is malformed, or the alias is alr
 
 ### GET /urls
 
+Supports query parameters `page` and `size` (defaults: `page=0`, `size=10`).
+
 ```json
 // Response 200
-[
-  {
-    "alias": "my-alias",
-    "fullUrl": "https://example.com/very/long/path",
-    "shortUrl": "http://localhost:8080/my-alias"
-  }
-]
+{
+  "items": [
+    {
+      "alias": "my-alias",
+      "fullUrl": "https://example.com/very/long/path",
+      "shortUrl": "http://localhost:8080/my-alias"
+    }
+  ],
+  "totalCount": 42,
+  "page": 0,
+  "size": 10
+}
 ```
+
+The list is returned in pages using `LIMIT` and `OFFSET` in the backend query. The response includes the requested page slice and the total number of matching rows.
 
 ### GET /{alias}
 

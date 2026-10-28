@@ -3,6 +3,7 @@ package com.urlshortener.service;
 import com.urlshortener.model.ShortenUrlRequest;
 import com.urlshortener.model.ShortenUrlResponse;
 import com.urlshortener.model.UrlListItem;
+import com.urlshortener.model.UrlPageResponse;
 import com.urlshortener.repository.ShortenedUrlRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,6 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 @Service
 public class UrlShortenerService {
@@ -50,6 +50,14 @@ public class UrlShortenerService {
 
     public List<UrlListItem> getAll(String baseUrl) {
         return repository.findAll(baseUrl);
+    }
+
+    public UrlPageResponse getAll(String baseUrl, int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
+        var items = repository.findAll(baseUrl, safePage, safeSize);
+        var totalCount = repository.countAll();
+        return new UrlPageResponse(items, totalCount, safePage, safeSize);
     }
 
     public boolean delete(String alias) {

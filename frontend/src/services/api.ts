@@ -1,4 +1,4 @@
-import type { ShortenUrlRequest, ShortenUrlResponse, UrlListItem } from '../types/api';
+import type { PaginatedUrlResponse, ShortenUrlRequest, ShortenUrlResponse, UrlListItem } from '../types/api';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -27,8 +27,9 @@ export const api = {
     }).then((r) => handleResponse<ShortenUrlResponse>(r));
   },
 
-  listAll(): Promise<UrlListItem[]> {
-    return fetch(`${API_BASE}/urls`).then((r) => handleResponse<UrlListItem[]>(r));
+  listAll(page = 0, size = 10): Promise<PaginatedUrlResponse> {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    return fetch(`${API_BASE}/urls?${params.toString()}`).then((r) => handleResponse<PaginatedUrlResponse>(r));
   },
 
   delete(alias: string): Promise<void> {

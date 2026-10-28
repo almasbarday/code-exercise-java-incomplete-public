@@ -35,16 +35,17 @@ describe('api service', () => {
       .rejects.toThrow('Alias already taken.');
   });
 
-  it('listAll sends GET to /urls', async () => {
+  it('listAll sends GET to /urls with page and size params', async () => {
+    const mockResponse = { items: [], totalCount: 0, page: 0, size: 10 };
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => [],
+      json: async () => mockResponse,
     } as Response);
 
-    await api.listAll();
+    await api.listAll(0, 10);
 
-    expect(fetch).toHaveBeenCalledWith('/urls');
+    expect(fetch).toHaveBeenCalledWith('/urls?page=0&size=10');
   });
 
   it('delete sends DELETE to /{alias}', async () => {
