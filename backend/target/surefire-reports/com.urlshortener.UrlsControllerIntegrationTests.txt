@@ -1,16 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.urlshortener.UrlsControllerIntegrationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 1.415 s <<< FAILURE! -- in com.urlshortener.UrlsControllerIntegrationTests
-com.urlshortener.UrlsControllerIntegrationTests.getAlias_ExistingAlias_Returns301WithLocation -- Time elapsed: 0.353 s <<< FAILURE!
-org.opentest4j.AssertionFailedError: 
-
-expected: 308 PERMANENT_REDIRECT
- but was: 302 FOUND
-	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
-	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
-	at com.urlshortener.UrlsControllerIntegrationTests.getAlias_ExistingAlias_Returns301WithLocation(UrlsControllerIntegrationTests.java:45)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
-
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.294 s -- in com.urlshortener.UrlsControllerIntegrationTests

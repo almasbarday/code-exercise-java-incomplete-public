@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class UrlShortenerService {
 
-    private static final String ALIAS_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final String ALIAS_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
     private static final int GENERATED_ALIAS_LENGTH = 7;
 
     private final ShortenedUrlRepository repository;
@@ -60,9 +60,18 @@ public class UrlShortenerService {
         return repository.deleteByAlias(alias);
     }
 
-    private static String generateAlias() {
-        // TODO: Implement alias generation.
-        return "";
+    private String generateAlias() {
+        String alias;
+        do {
+            var builder = new StringBuilder(GENERATED_ALIAS_LENGTH);
+            for (int i = 0; i < GENERATED_ALIAS_LENGTH; i++) {
+                var index = ThreadLocalRandom.current().nextInt(ALIAS_CHARS.length());
+                builder.append(ALIAS_CHARS.charAt(index));
+            }
+            alias = builder.toString();
+        } while (repository.existsByAlias(alias));
+
+        return alias;
     }
 
     private static boolean isValidAlias(String alias) {
@@ -90,7 +99,7 @@ public class UrlShortenerService {
 
             var path = uri.getPath();
             if (path == null || path.isBlank()) {
-                path = "/";
+                path = "";
             }
 
             return new URI(

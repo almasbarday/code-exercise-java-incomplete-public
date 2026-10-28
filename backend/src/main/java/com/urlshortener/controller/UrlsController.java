@@ -47,7 +47,7 @@ public class UrlsController {
         if (fullUrl == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(fullUrl)).build();
+        return ResponseEntity.status(HttpStatus.PERMANENT_REDIRECT).location(URI.create(fullUrl)).build();
     }
 
     @DeleteMapping("/{alias}")
